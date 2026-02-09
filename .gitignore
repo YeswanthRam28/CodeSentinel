@@ -1,0 +1,15 @@
+.env
+.env.*
+! .env.example
+coverage
+build
+.next
+.cache
+.parcel-cache
+.eslintcache
+.stylelintcache
+node_modules
+.DS_Store
+.vscode
+.idea
+*.log
