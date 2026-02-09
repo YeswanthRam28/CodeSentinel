@@ -6,8 +6,9 @@
 CodeSentinel isn't a chatbot; it's an **Agentic Workflow**. It follows a cycle of **Plan -> Act -> Observe -> Correct** to solve engineering tasks asynchronously in a secure sandbox.
 
 ## 🧠 Key Features
-- **Symbolic Context Search:** Uses AST parsing (`tree-sitter`) to understand repository structures, not just raw text.
-- **Self-Healing Loop:** Automatically writes code, runs tests, analyzes failures, and iterates until the task is complete.
+- **Symbolic Context Search (✅ Implemented):** Uses AST parsing (`tree-sitter`) to understand repository structures and generates a structural "Skeleton" of classes and functions.
+- **Repository Sandbox (✅ Implemented):** Clones any public GitHub repository into a secure, isolated Docker container for analysis.
+- **Self-Healing Loop (🚧 In Progress):** Automatically writes code, runs tests, analyzes failures, and iterates until the task is complete.
 - **Sandboxed Security:** Executes all code within isolated Docker containers.
 - **Next-Gen UI:** A premium, cyber-industrial dashboard built with Next.js 14, Tailwind CSS, and Framer Motion.
 
