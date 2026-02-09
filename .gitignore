@@ -13,3 +13,13 @@ node_modules
 .vscode
 .idea
 *.log
+
+# Project specific
+implementation_plan.md
+
+# Python
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
