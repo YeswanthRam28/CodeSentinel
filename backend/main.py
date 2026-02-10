@@ -65,10 +65,12 @@ async def execute_task(request: TaskRequest):
         # 1. Initialize State
         repo_service = RepoService(sandbox)
         skeleton_service = SkeletonService(sandbox)
+        github_service = GitHubService()
         
         print(f"Starting task: {request.task} on {request.repo_url}")
         
-        repo_service.clone_repo(request.repo_url)
+        auth_url = github_service.get_auth_url(request.repo_url)
+        repo_service.clone_repo(auth_url)
         skeleton = skeleton_service.generate_skeleton()
         
         initial_state: AgentState = {

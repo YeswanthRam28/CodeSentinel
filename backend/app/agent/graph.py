@@ -15,6 +15,7 @@ def create_sentinel_graph(sandbox: Sandbox, broadcaster=None):
     workflow.add_node("research", nodes.research_node)
     workflow.add_node("code", nodes.code_node)
     workflow.add_node("test", nodes.test_node)
+    workflow.add_node("pr", nodes.pr_node)
 
     # Define Edges
     workflow.set_entry_point("plan")
@@ -26,7 +27,7 @@ def create_sentinel_graph(sandbox: Sandbox, broadcaster=None):
     # Conditional logic for retries / success
     def should_continue(state: AgentState):
         if state["is_complete"]:
-            return "end"
+            return "pr"
         if state["retry_count"] >= 5:
             return "end"
         return "code" # Retry coding/correcting
@@ -35,9 +36,12 @@ def create_sentinel_graph(sandbox: Sandbox, broadcaster=None):
         "test",
         should_continue,
         {
+            "pr": "pr",
             "end": END,
             "code": "code"
         }
     )
+
+    workflow.add_edge("pr", END)
 
     return workflow.compile()
