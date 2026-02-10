@@ -20,32 +20,52 @@ from app.services.repo_service import RepoService
 from app.services.skeleton_service import SkeletonService
 from pydantic import BaseModel
 
-class RepoRequest(BaseModel):
-    repo_url: str
+from app.agent.graph import create_sentinel_graph
+from app.agent.state import AgentState
 
-@app.post("/analyze-repo")
-async def analyze_repo(request: RepoRequest):
-    """Phase 2: Clone and analyze a repository structure."""
+class TaskRequest(BaseModel):
+    repo_url: str
+    task: str
+
+@app.post("/execute-task")
+async def execute_task(request: TaskRequest):
+    """Phase 3: Trigger the full autonomous Agentic Workflow."""
     sandbox = Sandbox()
     try:
         sandbox.start()
         
+        # 1. Initialize State
         repo_service = RepoService(sandbox)
         skeleton_service = SkeletonService(sandbox)
         
-        # 1. Clone
-        clone_res = repo_service.clone_repo(request.repo_url)
-        if clone_res["exit_code"] != 0:
-            return {"status": "error", "message": "Clone failed", "output": clone_res["output"]}
-            
-        # 2. Analyze
+        print(f"Starting task: {request.task} on {request.repo_url}")
+        
+        repo_service.clone_repo(request.repo_url)
         skeleton = skeleton_service.generate_skeleton()
+        
+        initial_state: AgentState = {
+            "task": request.task,
+            "repo_url": request.repo_url,
+            "repo_skeleton": skeleton,
+            "plan": [],
+            "relevant_files": [],
+            "patches": {},
+            "test_results": None,
+            "retry_count": 0,
+            "history": [f"Task assigned: {request.task}"],
+            "is_complete": False,
+            "message": ""
+        }
+        
+        # 2. Run Graph
+        graph = create_sentinel_graph(sandbox)
+        final_state = await graph.ainvoke(initial_state)
         
         sandbox.stop()
         return {
-            "status": "success",
-            "repo": request.repo_url,
-            "skeleton": skeleton
+            "status": "success" if final_state["is_complete"] else "failed",
+            "history": final_state["history"],
+            "patches": final_state["patches"]
         }
     except Exception as e:
         if sandbox.container:
