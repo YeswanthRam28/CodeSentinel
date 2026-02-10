@@ -10,7 +10,7 @@ CodeSentinel isn't a chatbot; it's an **Agentic Workflow**. It follows a cycle o
 - **Repository Sandbox (✅ Implemented):** Clones any public GitHub repository into a secure, isolated Docker container for analysis.
 - **Self-Healing Loop (✅ Implemented):** Uses LangGraph to orchestrate a recursive reasoning loop: Plan -> Research -> Code -> Test -> Correct. Automatically iterates until tests pass.
 - **Sandboxed Security:** Executes all code within isolated Docker containers.
-- **Next-Gen UI:** A premium, cyber-industrial dashboard built with Next.js 14, Tailwind CSS, and Framer Motion.
+- **Next-Gen UI (✅ Implemented):** A premium, cyber-industrial dashboard built with React, Tailwind CSS, and Framer Motion, featuring a real-time WebSocket terminal.
 
 ## 🛠 Tech Stack
 - **Brain:** LangGraph + Google Gemini 1.5 Flash

@@ -1,9 +1,28 @@
-from fastapi import FastAPI, BackgroundTasks
+from fastapi import FastAPI, BackgroundTasks, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.sandbox import Sandbox
+from typing import List
 import os
 
 app = FastAPI(title="CodeSentinel Backend")
+
+# Simplified Connection Manager for Log Streaming
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: List[WebSocket] = []
+
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections.append(websocket)
+
+    def disconnect(self, websocket: WebSocket):
+        self.active_connections.remove(websocket)
+
+    async def broadcast(self, message: str):
+        for connection in self.active_connections:
+            await connection.send_text(message)
+
+manager = ConnectionManager()
 
 app.add_middleware(
     CORSMiddleware,
@@ -11,6 +30,15 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await manager.connect(websocket)
+    try:
+        while True:
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
 
 @app.get("/")
 def read_root():
@@ -58,7 +86,8 @@ async def execute_task(request: TaskRequest):
         }
         
         # 2. Run Graph
-        graph = create_sentinel_graph(sandbox)
+        await manager.broadcast(json.dumps({"text": "> Handshaking with Docker...", "status": "WAIT", "color": "text-gray-400"}))
+        graph = create_sentinel_graph(sandbox, broadcaster=manager.broadcast)
         final_state = await graph.ainvoke(initial_state)
         
         sandbox.stop()

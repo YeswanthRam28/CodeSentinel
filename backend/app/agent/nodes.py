@@ -9,8 +9,9 @@ from app.services.repo_service import RepoService
 from app.services.skeleton_service import SkeletonService
 
 class SentinelNodes:
-    def __init__(self, sandbox: Sandbox):
+    def __init__(self, sandbox: Sandbox, broadcaster=None):
         self.sandbox = sandbox
+        self.broadcaster = broadcaster
         self.repo_service = RepoService(sandbox)
         self.skeleton_service = SkeletonService(sandbox)
         self.llm = ChatGoogleGenerativeAI(
@@ -18,9 +19,17 @@ class SentinelNodes:
             google_api_key=os.getenv("GEMINI_API_KEY")
         )
 
-    def plan_node(self, state: AgentState) -> Dict[str, Any]:
+    async def log(self, text: str, status: str = "INFO", color: str = "text-gray-400"):
+        if self.broadcaster:
+            await self.broadcaster(json.dumps({
+                "text": f"> {text}",
+                "status": status,
+                "color": color
+            }))
+
+    async def plan_node(self, state: AgentState) -> Dict[str, Any]:
         """Node: Create a step-by-step plan based on the task and skeleton."""
-        print("--- Node: Planning ---")
+        await self.log("Planning implementation steps...", "PLAN", "text-blue-400")
         prompt = f"""
         You are CodeSentinel, an autonomous AI DevOps Agent.
         Task: {state['task']}
@@ -53,9 +62,9 @@ class SentinelNodes:
             "history": state.get("history", []) + ["Created initial implementation plan."]
         }
 
-    def research_node(self, state: AgentState) -> Dict[str, Any]:
+    async def research_node(self, state: AgentState) -> Dict[str, Any]:
         """Node: Identify relevant files and read their content."""
-        print("--- Node: Researching ---")
+        await self.log("Analyzing repository skeleton...", "SEARCH", "text-cyan-400")
         prompt = f"""
         Task: {state['task']}
         Plan: {json.dumps(state['plan'])}
@@ -80,9 +89,9 @@ class SentinelNodes:
             "history": state.get("history", []) + [f"Identified {len(plan_files)} relevant files for research."]
         }
 
-    def code_node(self, state: AgentState) -> Dict[str, Any]:
+    async def code_node(self, state: AgentState) -> Dict[str, Any]:
         """Node: Generate code changes/patches."""
-        print("--- Node: Coding ---")
+        await self.log("Generating autonomous patches...", "CODE", "text-violet-400")
         # In a real scenario, we'd read file contents here. 
         # For this phase, we simulate the "Brain" deciding what to change.
         prompt = f"""
@@ -115,9 +124,9 @@ class SentinelNodes:
             "history": state.get("history", []) + [f"Generated and applied patches to {len(patches)} files."]
         }
 
-    def test_node(self, state: AgentState) -> Dict[str, Any]:
+    async def test_node(self, state: AgentState) -> Dict[str, Any]:
         """Node: Execute tests in the sandbox."""
-        print("--- Node: Testing ---")
+        await self.log("Executing tests in Docker sandbox...", "TEST", "text-green-400")
         # Try to run common test commands
         res = self.sandbox.execute("pytest", workdir="/repo")
         if "command not found" in res["output"].lower():

@@ -3,11 +3,11 @@ from app.agent.state import AgentState
 from app.agent.nodes import SentinelNodes
 from app.core.sandbox import Sandbox
 
-def create_sentinel_graph(sandbox: Sandbox):
+def create_sentinel_graph(sandbox: Sandbox, broadcaster=None):
     """
     Creates and compiles the LangGraph state machine.
     """
-    nodes = SentinelNodes(sandbox)
+    nodes = SentinelNodes(sandbox, broadcaster)
     workflow = StateGraph(AgentState)
 
     # Add Nodes
