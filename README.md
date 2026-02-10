@@ -17,28 +17,56 @@ CodeSentinel isn't a chatbot; it's an **Agentic Workflow**. It follows a cycle o
 - **Brain:** LangGraph + Google Gemini 1.5 Flash
 - **Execution:** Docker (Python SDK)
 - **Backend:** FastAPI (Python)
-- **Frontend:** Next.js 14, Tailwind CSS, Lucide React
+- **Frontend:** React + Vite, Tailwind CSS, Framer Motion, React Router, Lucide React
 
 ## 🏁 Getting Started
 
 ### Prerequisites
-- Node.js
+- Node.js & npm
+- Python 3.10+
 - Docker (for agent execution)
+- [Google Gemini API Key](https://aistudio.google.com/)
+- [GitHub Personal Access Token](https://github.com/settings/tokens) (with `repo` scope)
 
-### Installation
-1. Clone the repository.
-2. Install dependencies:
+### Setup & Installation
+
+#### 1. Backend Setup
+1. Navigate to the backend directory:
+   ```bash
+   cd backend
+   ```
+2. Create and activate a virtual environment:
+   ```bash
+   python -m venv venv
+   # Windows
+   .\venv\Scripts\Activate.ps1
+   # Linux/macOS
+   source venv/bin/activate
+   ```
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. Configure `.env`:
+   ```bash
+   GEMINI_API_KEY=your_key
+   GITHUB_TOKEN=your_token
+   ```
+5. Start the backend:
+   ```bash
+   python main.py
+   ```
+
+#### 2. Frontend Setup
+1. In the root directory, install dependencies:
    ```bash
    npm install
    ```
-3. Set your environment variables in `.env.local`:
-   ```bash
-   GEMINI_API_KEY=your_api_key_here
-   ```
-4. Run the development server:
+2. Start the development server:
    ```bash
    npm run dev
    ```
+3. Visit `http://localhost:3000` to access the Landing Page, then navigate to `/dashboard` to start tasks.
 
 ---
 *Built with ❤️ for the future of autonomous engineering.*

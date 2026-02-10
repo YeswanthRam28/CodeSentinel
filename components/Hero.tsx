@@ -1,32 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, Variants } from 'framer-motion';
 import { Sparkles, ArrowRight, Loader2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Terminal, LogEntry } from './Terminal';
 
-interface HeroProps {
-  logs: LogEntry[];
-}
+const landingLogs: LogEntry[] = [
+  { text: "> Fetching GitHub Issue #1042...", status: "WAIT", color: "text-gray-400" },
+  { text: "> Cloning repository: /auth-service...", status: "DONE", color: "text-blue-400" },
+  { text: "> Initializing AST context engine...", status: "OK", color: "text-green-400" },
+  { text: "> Traversing dependency graph...", status: "OK", color: "text-green-400" },
+  { text: "> Found: Unhandled JWT exception", status: "BUG", color: "text-red-400" },
+  { text: "> Executing Docker sandbox session...", status: "RUN", color: "text-violet-400" },
+  { text: "> Patching 'middleware/auth.ts'...", status: "FIX", color: "text-cyan-400" },
+  { text: "> Running unit tests: 42 passed", status: "PASS", color: "text-green-400" },
+  { text: "> Generating Pull Request summary...", status: "OK", color: "text-blue-400" },
+  { text: "> SENTINEL: Task completed.", status: "IDLE", color: "text-white" },
+];
 
-export const Hero: React.FC<HeroProps> = ({ logs }) => {
-  const [repoUrl, setRepoUrl] = useState('');
-  const [task, setTask] = useState('');
-  const [loading, setLoading] = useState(false);
+export const Hero: React.FC = () => {
+  const [visibleLogs, setVisibleLogs] = useState<LogEntry[]>([]);
 
-  const handleStart = async () => {
-    if (!repoUrl || !task) return;
-    setLoading(true);
-    try {
-      await fetch('http://localhost:8000/execute-task', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ repo_url: repoUrl, task })
-      });
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    let i = 0;
+    const interval = setInterval(() => {
+      setVisibleLogs(landingLogs.slice(0, (i % landingLogs.length) + 1));
+      i++;
+    }, 1500);
+    return () => clearInterval(interval);
+  }, []);
 
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
@@ -56,33 +57,15 @@ export const Hero: React.FC<HeroProps> = ({ logs }) => {
           </motion.h1>
 
           <motion.p variants={itemVariants} className="text-xl text-gray-400 mb-10 max-w-lg leading-relaxed font-light">
-            Deploy CodeSentinel to any GitHub repo. It plan, researches, and fixes bugs autonomously in a secure sandbox.
+            CodeSentinel is an autonomous AI agent that clones your repo, analyzes AST structure, and merges PRs. No human input required.
           </motion.p>
 
-          <motion.div variants={itemVariants} className="space-y-4 max-w-md">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="GitHub Repo URL (e.g., https://github.com/user/repo)"
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-violet-500/50 transition-all"
-                value={repoUrl}
-                onChange={(e) => setRepoUrl(e.target.value)}
-              />
-            </div>
-            <div className="relative">
-              <textarea
-                placeholder="Assigned Task (e.g., Fix the JWT exception in middleware)"
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-violet-500/50 transition-all h-24 resize-none"
-                value={task}
-                onChange={(e) => setTask(e.target.value)}
-              />
-            </div>
-            <button
-              onClick={handleStart}
-              disabled={loading}
-              className="w-full px-8 py-4 bg-white text-black font-bold rounded-xl overflow-hidden transition-all hover:bg-gray-200 active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50"
-            >
-              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Deploy Sentinel <ArrowRight className="w-4 h-4" /></>}
+          <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4">
+            <Link to="/dashboard" className="px-8 py-4 bg-white text-black font-bold rounded-full overflow-hidden transition-all hover:bg-gray-200 active:scale-95 flex items-center justify-center gap-2">
+              Get Started <ArrowRight className="w-4 h-4" />
+            </Link>
+            <button className="px-8 py-4 bg-white/5 border border-white/10 text-white font-bold rounded-full hover:bg-white/10 hover:border-white/20 transition-all active:scale-95">
+              Watch Demo
             </button>
           </motion.div>
 
@@ -103,7 +86,7 @@ export const Hero: React.FC<HeroProps> = ({ logs }) => {
           transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] }}
           className="relative flex items-center justify-center"
         >
-          <Terminal logs={logs} />
+          <Terminal logs={visibleLogs} />
         </motion.div>
       </div>
     </section>

@@ -1,25 +1,25 @@
-
 import React from 'react';
 import { Shield, Github, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 
 export const Navbar: React.FC = () => {
   return (
     <div className="fixed top-0 left-0 right-0 z-50 flex justify-center p-6 pointer-events-none">
-      <motion.nav 
+      <motion.nav
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
         className="pointer-events-auto flex items-center gap-8 px-6 py-3 rounded-full border border-white/10 bg-black/40 backdrop-blur-2xl shadow-2xl"
       >
-        <div className="flex items-center gap-2 group cursor-pointer">
+        <Link to="/" className="flex items-center gap-2 group cursor-pointer">
           <Shield className="w-5 h-5 text-violet-500 group-hover:rotate-12 transition-transform" />
           <span className="text-sm font-bold tracking-tighter text-white">CodeSentinel</span>
-        </div>
+        </Link>
 
         <div className="hidden md:flex items-center gap-6 text-[13px] font-medium text-gray-400">
-          <a href="#" className="hover:text-white transition-colors">Product</a>
-          <a href="#" className="hover:text-white transition-colors">Features</a>
+          <Link to="/" className="hover:text-white transition-colors">Home</Link>
+          <Link to="/dashboard" className="hover:text-white transition-colors">Dashboard</Link>
           <a href="#" className="hover:text-white transition-colors">Security</a>
         </div>
 
