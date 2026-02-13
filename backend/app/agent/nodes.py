@@ -1,3 +1,4 @@
+import posixpath
 import json
 import os
 from typing import Dict, Any, List
@@ -17,11 +18,12 @@ class SentinelNodes:
         self.skeleton_service = SkeletonService(sandbox)
         self.github_service = GitHubService()
         self.llm = ChatGoogleGenerativeAI(
-            model="gemini-1.5-flash", 
+            model="gemini-2.5-flash", 
             google_api_key=os.getenv("GEMINI_API_KEY")
         )
 
     async def log(self, text: str, status: str = "INFO", color: str = "text-gray-400"):
+        print(f"[{status}] {text}")
         if self.broadcaster:
             await self.broadcaster(json.dumps({
                 "text": f"> {text}",
@@ -117,9 +119,14 @@ class SentinelNodes:
         # Apply patches in sandbox
         for path, code in patches.items():
             dir_name = os.path.dirname(path)
-            if dir_name:
-                self.sandbox.execute(f"mkdir -p {dir_name}", workdir="/repo")
-            self.sandbox.upload_file(code, os.path.basename(path), os.path.join("/repo", dir_name))
+            # Ensure path uses forward slashes for Linux container
+            linux_dir = dir_name.replace("\\", "/")
+            if linux_dir:
+                self.sandbox.execute(f"mkdir -p {linux_dir}", workdir="/repo")
+            
+            # Use posixpath.join to force forward slashes
+            dest_path = posixpath.join("/repo", linux_dir)
+            self.sandbox.upload_file(code, os.path.basename(path), dest_path)
 
         return {
             "patches": patches,
@@ -128,12 +135,20 @@ class SentinelNodes:
 
     async def test_node(self, state: AgentState) -> Dict[str, Any]:
         """Node: Execute tests in the sandbox."""
-        await self.log("Executing tests in Docker sandbox...", "TEST", "text-green-400")
+        await self.log("Installing dependencies and executing tests...", "TEST", "text-green-400")
+        
+        # Install dependencies
+        self.sandbox.execute("pip install pytest", workdir="/repo")
+        self.sandbox.execute("pip install -r requirements.txt", workdir="/repo")
+        
         # Try to run common test commands
         res = self.sandbox.execute("pytest", workdir="/repo")
-        if "command not found" in res["output"].lower():
+        if "command not found" in res["output"].lower() or res["exit_code"] == 127:
              res = self.sandbox.execute("python -m unittest discover", workdir="/repo")
              
+        print(f"[TEST RESULT] Exit Code: {res['exit_code']}")
+        print(f"[TEST OUTPUT] {res['output'][:500]}...") # Print first 500 chars
+
         success = res["exit_code"] == 0
         return {
             "test_results": res,

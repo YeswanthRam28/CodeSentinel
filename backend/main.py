@@ -3,6 +3,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.sandbox import Sandbox
 from typing import List
 import os
+import json
+from dotenv import load_dotenv
+
+load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"))
 
 app = FastAPI(title="CodeSentinel Backend")
 
@@ -46,6 +50,7 @@ def read_root():
 
 from app.services.repo_service import RepoService
 from app.services.skeleton_service import SkeletonService
+from app.services.github_service import GitHubService
 from pydantic import BaseModel
 
 from app.agent.graph import create_sentinel_graph
@@ -70,7 +75,10 @@ async def execute_task(request: TaskRequest):
         print(f"Starting task: {request.task} on {request.repo_url}")
         
         auth_url = github_service.get_auth_url(request.repo_url)
-        repo_service.clone_repo(auth_url)
+        clone_res = repo_service.clone_repo(auth_url)
+        if clone_res["exit_code"] != 0:
+            raise Exception(f"Failed to clone repository: {clone_res['output']}")
+        
         skeleton = skeleton_service.generate_skeleton()
         
         initial_state: AgentState = {
@@ -99,6 +107,9 @@ async def execute_task(request: TaskRequest):
             "patches": final_state["patches"]
         }
     except Exception as e:
+        import traceback
+        traceback.print_exc()
+        print(f"Error executing task: {e}")
         if sandbox.container:
             sandbox.stop()
         return {"status": "error", "message": str(e)}

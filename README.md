@@ -14,7 +14,7 @@ CodeSentinel isn't a chatbot; it's an **Agentic Workflow**. It follows a cycle o
 - **Autonomous GitHub PRs (✅ Implemented):** Automatically creates Pull Requests on GitHub after verifying fixes in the sandbox.
 
 ## 🛠 Tech Stack
-- **Brain:** LangGraph + Google Gemini 1.5 Flash
+- **Brain:** LangGraph + Google Gemini 2.0 Flash
 - **Execution:** Docker (Python SDK)
 - **Backend:** FastAPI (Python)
 - **Frontend:** React + Vite, Tailwind CSS, Framer Motion, React Router, Lucide React
