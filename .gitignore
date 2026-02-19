@@ -18,6 +18,7 @@ node_modules
 # Project specific
 implementation_plan.md
 script.md
+host.md
 
 # Python
 venv/
