@@ -1,62 +1,56 @@
-import docker
+from e2b import Sandbox as E2BSandbox
 import os
-import tarfile
 import io
 from typing import Optional, Dict
 
 class Sandbox:
-    def __init__(self, image: str = "python:3.11-slim"):
-        self.client = docker.from_env()
-        self.image = image
-        self.container = None
+    def __init__(self, template: str = "base"):
+        self.template = template
+        self.sandbox: Optional[E2BSandbox] = None
 
     def start(self):
-        """Start an ephemeral Docker container."""
-        print(f"Starting container: {self.image}")
-        self.container = self.client.containers.run(
-            self.image,
-            command="tail -f /dev/null",
-            detach=True,
-            remove=True,
-            network_disabled=False # Needed for cloning repos
-        )
-        return self.container.id
+        """Start an ephemeral E2B cloud sandbox."""
+        print(f"Starting cloud sandbox (E2B)...")
+        self.sandbox = E2BSandbox.create(template=self.template)
+        return self.sandbox.sandbox_id
 
-    def execute(self, command: str, workdir: str = "/") -> Dict[str, str]:
-        """Execute a command inside the container and capture output."""
-        if not self.container:
-            raise Exception("Container not started.")
+    def execute(self, command: str, workdir: str = "/home/user") -> Dict[str, str]:
+        """Execute a command inside the cloud sandbox and capture output."""
+        if not self.sandbox:
+            raise Exception("Sandbox not started.")
         
-        result = self.container.exec_run(command, workdir=workdir)
+        # E2B commands run as 'user' by default, usually in /home/user
+        # We wrap the command to ensure we are in the right workdir
+        cmd = f"cd {workdir} && {command}"
+        print(f"Executing: {cmd}")
+        
+        result = self.sandbox.commands.run(cmd)
+        
         return {
             "exit_code": result.exit_code,
-            "output": result.output.decode("utf-8")
+            "output": result.stdout + result.stderr
         }
 
     def stop(self):
-        """Stop and remove the container."""
-        if self.container:
-            self.container.stop()
-            self.container = None
+        """Close the cloud sandbox."""
+        if self.sandbox:
+            self.sandbox.kill()
+            self.sandbox = None
 
-    def upload_file(self, content: str, filename: str, path: str = "/"):
-        """Upload a file to the container."""
-        if not self.container:
-            raise Exception("Container not started.")
+    def upload_file(self, content: str, filename: str, path: str = "/home/user"):
+        """Upload a file to the cloud sandbox."""
+        if not self.sandbox:
+            raise Exception("Sandbox not started.")
         
-        # Create a tar archive in memory
-        tar_stream = io.BytesIO()
-        with tarfile.open(fileobj=tar_stream, mode='w') as tar:
-            content_bytes = content.encode('utf-8')
-            tarinfo = tarfile.TarInfo(name=filename)
-            tarinfo.size = len(content_bytes)
-            tar.addfile(tarinfo, io.BytesIO(content_bytes))
+        # Ensure path exists
+        self.sandbox.commands.run(f"mkdir -p {path}")
         
-        tar_stream.seek(0)
-        self.container.put_archive(path, tar_stream)
+        # Join path properly for Linux
+        full_path = f"{path.rstrip('/')}/{filename}"
+        
+        # Write file content
+        self.sandbox.files.write(full_path, content)
 
-# Usage Example (To be moved to tests later):
-# sandbox = Sandbox()
-# sandbox.start()
-# print(sandbox.execute("pip --version"))
-# sandbox.stop()
+    @property
+    def sandbox_id(self):
+        return self.sandbox.sandbox_id if self.sandbox else None

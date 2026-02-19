@@ -19,7 +19,7 @@ export const Dashboard: React.FC = () => {
         ws.onmessage = (event) => {
             try {
                 const data = JSON.parse(event.data);
-                setLogs(prev => [...prev.slice(-9), data]); // Keep last 10 logs
+                setLogs(prev => [...prev.slice(-99), data]); // Keep last 100 logs
             } catch (e) {
                 console.error("Failed to parse WS message", e);
             }
@@ -33,11 +33,18 @@ export const Dashboard: React.FC = () => {
         setLoading(true);
         setLogs([{ text: "> Initializing task execution...", status: "START", color: "text-blue-400" }]);
         try {
-            await fetch('http://localhost:8000/execute-task', {
+            const response = await fetch('http://localhost:8000/execute-task', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ repo_url: repoUrl, task })
             });
+
+            const data = await response.json();
+            if (data.status === "error") {
+                setLogs(prev => [...prev, { text: `> Error: ${data.message}`, status: "ERROR", color: "text-red-400" }]);
+            } else if (data.status === "failed") {
+                setLogs(prev => [...prev, { text: `> Task failed. Check output.`, status: "FAIL", color: "text-red-400" }]);
+            }
         } catch (err) {
             console.error(err);
             setLogs(prev => [...prev, { text: "> Connection error. Is the backend running?", status: "ERROR", color: "text-red-400" }]);

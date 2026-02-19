@@ -8,7 +8,17 @@ from dotenv import load_dotenv
 
 load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"))
 
-app = FastAPI(title="CodeSentinel Backend")
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Initialize WebSocket logging
+    from app.core.logger import setup_websocket_logger
+    setup_websocket_logger(manager.broadcast)
+    yield
+    # Shutdown logic (if any) here
+
+app = FastAPI(title="CodeSentinel Backend", lifespan=lifespan)
 
 # Simplified Connection Manager for Log Streaming
 class ConnectionManager:
@@ -43,6 +53,7 @@ async def websocket_endpoint(websocket: WebSocket):
             await websocket.receive_text()
     except WebSocketDisconnect:
         manager.disconnect(websocket)
+
 
 @app.get("/")
 def read_root():
@@ -96,7 +107,7 @@ async def execute_task(request: TaskRequest):
         }
         
         # 2. Run Graph
-        await manager.broadcast(json.dumps({"text": "> Handshaking with Docker...", "status": "WAIT", "color": "text-gray-400"}))
+        print("[WAIT] Initializing E2B Cloud Sandbox...")
         graph = create_sentinel_graph(sandbox, broadcaster=manager.broadcast)
         final_state = await graph.ainvoke(initial_state)
         
@@ -110,7 +121,7 @@ async def execute_task(request: TaskRequest):
         import traceback
         traceback.print_exc()
         print(f"Error executing task: {e}")
-        if sandbox.container:
+        if hasattr(sandbox, 'sandbox') and sandbox.sandbox:
             sandbox.stop()
         return {"status": "error", "message": str(e)}
 

@@ -14,7 +14,7 @@ class SkeletonService:
         # that we inject into the container.
         pass
 
-    def generate_skeleton(self, repo_path: str = "/repo") -> Dict[str, Any]:
+    def generate_skeleton(self, repo_path: str = "/home/user/repo") -> Dict[str, Any]:
         """
         Generates a structural map of the repository.
         This script is injected and executed inside the sandbox.
@@ -55,8 +55,8 @@ for root, dirs, files in os.walk("."):
 
 print(json.dumps(repo_map))
 """
-        self.sandbox.upload_file(skeleton_script, "skeleton_gen.py", "/tmp")
-        result = self.sandbox.execute("python3 /tmp/skeleton_gen.py", workdir=repo_path)
+        self.sandbox.upload_file(skeleton_script, "skeleton_gen.py", "/home/user/tmp")
+        result = self.sandbox.execute("python3 /home/user/tmp/skeleton_gen.py", workdir=repo_path)
         
         try:
             return json.loads(result["output"])

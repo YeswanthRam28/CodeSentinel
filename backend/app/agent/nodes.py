@@ -23,13 +23,9 @@ class SentinelNodes:
         )
 
     async def log(self, text: str, status: str = "INFO", color: str = "text-gray-400"):
+        # We just need to print now, as the StreamToLogger captures it 
+        # and parses the [STATUS] pattern.
         print(f"[{status}] {text}")
-        if self.broadcaster:
-            await self.broadcaster(json.dumps({
-                "text": f"> {text}",
-                "status": status,
-                "color": color
-            }))
 
     async def plan_node(self, state: AgentState) -> Dict[str, Any]:
         """Node: Create a step-by-step plan based on the task and skeleton."""
@@ -122,10 +118,10 @@ class SentinelNodes:
             # Ensure path uses forward slashes for Linux container
             linux_dir = dir_name.replace("\\", "/")
             if linux_dir:
-                self.sandbox.execute(f"mkdir -p {linux_dir}", workdir="/repo")
+                self.sandbox.execute(f"mkdir -p /home/user/repo/{linux_dir}")
             
             # Use posixpath.join to force forward slashes
-            dest_path = posixpath.join("/repo", linux_dir)
+            dest_path = posixpath.join("/home/user/repo", linux_dir)
             self.sandbox.upload_file(code, os.path.basename(path), dest_path)
 
         return {
@@ -138,13 +134,13 @@ class SentinelNodes:
         await self.log("Installing dependencies and executing tests...", "TEST", "text-green-400")
         
         # Install dependencies
-        self.sandbox.execute("pip install pytest", workdir="/repo")
-        self.sandbox.execute("pip install -r requirements.txt", workdir="/repo")
+        self.sandbox.execute("pip install pytest", workdir="/home/user/repo")
+        self.sandbox.execute("pip install -r requirements.txt", workdir="/home/user/repo")
         
         # Try to run common test commands
-        res = self.sandbox.execute("pytest", workdir="/repo")
+        res = self.sandbox.execute("pytest", workdir="/home/user/repo")
         if "command not found" in res["output"].lower() or res["exit_code"] == 127:
-             res = self.sandbox.execute("python -m unittest discover", workdir="/repo")
+             res = self.sandbox.execute("python -m unittest discover", workdir="/home/user/repo")
              
         print(f"[TEST RESULT] Exit Code: {res['exit_code']}")
         print(f"[TEST OUTPUT] {res['output'][:500]}...") # Print first 500 chars

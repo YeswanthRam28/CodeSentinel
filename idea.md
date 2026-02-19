@@ -18,10 +18,10 @@ It functions as a "Junior Developer" that lives in the cloud. You do not chat wi
     * *Why:* We map the repo structure symbolically (Classes, Functions) rather than just embedding raw text (RAG).
 
 ### B. The "Body" (Execution Environment)
-* **Runtime:** **Docker** (Python SDK).
-    * *Mechanism:* Every task spins up a fresh, isolated container.
-    * *Security:* Network access is restricted. The container is destroyed post-execution.
-* **Backend:** **FastAPI** (Python). Handles webhooks, Docker management, and WebSocket streams.
+* **Runtime:** **E2B Sandboxes** (Firecracker MicroVMs).
+    * *Mechanism:* Every task spins up a fresh, isolated cloud sandbox.
+    * *Security:* Network access is monitored. The sandbox is killed post-execution.
+* **Backend:** **FastAPI** (Python). Handles webhooks, Sandbox management, and WebSocket streams.
 
 ### C. The "Face" (Frontend Experience)
 * **Framework:** **Next.js 14** (App Router).
@@ -43,7 +43,7 @@ It functions as a "Junior Developer" that lives in the cloud. You do not chat wi
     * *Limit:* Max 5 retries to prevent infinite loops.
 
 3.  **Sandboxed Security:**
-    * "What happens in Docker, stays in Docker." Malicious code generation cannot harm the host server.
+    * "What happens in E2B, stays in E2B." Malicious code generation cannot harm your local machine or the host server.
 
 ---
 
