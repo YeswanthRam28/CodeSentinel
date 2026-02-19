@@ -1,5 +1,6 @@
 .env
 .env.*
+dist/
 ! .env.example
 coverage
 build

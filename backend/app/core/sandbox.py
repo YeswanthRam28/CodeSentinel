@@ -10,8 +10,12 @@ class Sandbox:
 
     def start(self):
         """Start an ephemeral E2B cloud sandbox."""
+        api_key = os.getenv("E2B_API_KEY")
+        if not api_key:
+            raise Exception("E2B_API_KEY not found in environment. Please add it to your .env file or hosting provider's variables.")
+            
         print(f"Starting cloud sandbox (E2B)...")
-        self.sandbox = E2BSandbox.create(template=self.template)
+        self.sandbox = E2BSandbox.create(template=self.template, api_key=api_key)
         return self.sandbox.sandbox_id
 
     def execute(self, command: str, workdir: str = "/home/user") -> Dict[str, str]:

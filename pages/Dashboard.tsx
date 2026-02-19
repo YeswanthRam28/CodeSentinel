@@ -13,8 +13,12 @@ export const Dashboard: React.FC = () => {
         { text: "> CodeSentinel Dashboard initialized. Standing by for assignment.", status: "INFO", color: "text-gray-400" }
     ]);
 
+    // Support dynamic backend URLs
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    const WS_URL = API_URL.replace('http', 'ws');
+
     useEffect(() => {
-        const ws = new WebSocket('ws://localhost:8000/ws');
+        const ws = new WebSocket(`${WS_URL}/ws`);
 
         ws.onmessage = (event) => {
             try {
@@ -33,7 +37,7 @@ export const Dashboard: React.FC = () => {
         setLoading(true);
         setLogs([{ text: "> Initializing task execution...", status: "START", color: "text-blue-400" }]);
         try {
-            const response = await fetch('http://localhost:8000/execute-task', {
+            const response = await fetch(`${API_URL}/execute-task`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ repo_url: repoUrl, task })
