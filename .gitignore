@@ -1,24 +1,28 @@
+# Build and dependency folders
+node_modules/
+dist/
+build/
+coverage/
+.next/
+.cache/
+.parcel-cache/
+.eslintcache/
+.stylelintcache/
+.pytest_cache/
+htmlcov/
+
+# Environment variables (Never commit!)
 .env
 .env.*
-dist/
 ! .env.example
-coverage
-build
-.next
-.cache
-.parcel-cache
-.eslintcache
-.stylelintcache
-node_modules
+
+# OS and Logs
 .DS_Store
-.vscode
-.idea
 *.log
 
-# Project specific
-implementation_plan.md
-script.md
-host.md
+# IDEs
+.vscode/
+.idea/
 
 # Python
 venv/
@@ -26,3 +30,9 @@ venv/
 __pycache__/
 *.py[cod]
 *$py.class
+.coverage
+
+# Project specific
+implementation_plan.md
+script.md
+host.md

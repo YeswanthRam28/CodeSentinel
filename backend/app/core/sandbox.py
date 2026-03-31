@@ -28,12 +28,23 @@ class Sandbox:
         cmd = f"cd {workdir} && {command}"
         print(f"Executing: {cmd}")
         
-        result = self.sandbox.commands.run(cmd)
+        from e2b.sandbox.commands.command_handle import CommandExitException
         
-        return {
-            "exit_code": result.exit_code,
-            "output": result.stdout + result.stderr
-        }
+        try:
+            result = self.sandbox.commands.run(cmd)
+            return {
+                "exit_code": result.exit_code,
+                "output": result.stdout + result.stderr
+            }
+        except CommandExitException as e:
+            # Return as regular result so the agent can reason about it
+            return {
+                "exit_code": 1,
+                "output": str(e)
+            }
+        except Exception as e:
+            # Other errors (network etc) should still probably raise
+            raise e
 
     def stop(self):
         """Close the cloud sandbox."""

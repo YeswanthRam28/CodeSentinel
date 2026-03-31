@@ -11,8 +11,14 @@ export interface LogEntry {
 interface TerminalProps {
   logs: LogEntry[];
 }
-
 export const Terminal: React.FC<TerminalProps> = ({ logs }) => {
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [logs]);
 
   return (
     <motion.div
@@ -38,7 +44,10 @@ export const Terminal: React.FC<TerminalProps> = ({ logs }) => {
           </div>
 
           {/* Terminal Content */}
-          <div className="p-8 h-[380px] overflow-hidden mono text-[13px] leading-relaxed">
+          <div 
+            ref={scrollRef}
+            className="p-8 h-[380px] overflow-y-auto mono text-[13px] leading-relaxed scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent pr-4 custom-scrollbar"
+          >
             <AnimatePresence mode="popLayout">
               {logs.map((log, i) => (
                 <motion.div

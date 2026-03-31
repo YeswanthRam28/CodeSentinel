@@ -7,26 +7,25 @@ CodeSentinel isn't a chatbot; it's an **Agentic Workflow**. It follows a cycle o
 
 ## 🧠 Key Features
 - **Symbolic Context Search (✅ Implemented):** Uses AST parsing (`tree-sitter`) to understand repository structures and generates a structural "Skeleton" of classes and functions.
-- **Repository Sandbox (✅ Implemented):** Clones any public GitHub repository into a secure, isolated E2B Cloud Sandbox (Firecracker microVM) for analysis.
-- **Self-Healing Loop (✅ Implemented):** Uses LangGraph to orchestrate a recursive reasoning loop: Plan -> Research -> Code -> Test -> Correct. Automatically iterates until tests pass.
-- **Sandboxed Security:** Executes all code within isolated cloud environments.
-- **Next-Gen UI (✅ Implemented):** A premium, cyber-industrial dashboard built with React, Tailwind CSS, and Framer Motion, featuring a real-time WebSocket terminal.
+- **Universal Sandbox (✅ Implemented):** Isolated E2B Cloud Sandboxes (Firecracker microVMs) with **Smart Dependency Detection** (Python, Node.js, and static checks).
+- **Self-Healing Loop (✅ Implemented):** Uses LangGraph to orchestrate a recursive reasoning loop: Plan -> Research -> Code -> Test -> Correct.
+- **Cyber-Industrial Dashboard (✅ Implemented):** A premium Dark Mode UI built with React + Framer Motion, featuring a real-time, autoscrolling WebSocket terminal.
 - **Autonomous GitHub PRs (✅ Implemented):** Automatically creates Pull Requests on GitHub after verifying fixes in the sandbox.
 
 ## 🛠 Tech Stack
-- **Brain:** LangGraph + Google Gemini 2.0 Flash
-- **Execution:** E2B Cloud Sandboxes (Firecracker microVMs)
+- **Brain:** LangGraph + NVIDIA API (Moonshot Kimi-K2)
+- **Execution:** E2B Cloud Sandboxes
 - **Backend:** FastAPI (Python)
-- **Frontend:** React + Vite, Tailwind CSS, Framer Motion, React Router, Lucide React
+- **Frontend:** React + Vite, Tailwind CSS, Framer Motion
 
 ## 🏁 Getting Started
 
 ### Prerequisites
 - Node.js & npm
 - Python 3.10+
-- [ ] E2B API Key (for cloud agent execution)
-- [Google Gemini API Key](https://aistudio.google.com/)
-- [GitHub Personal Access Token](https://github.com/settings/tokens) (with `repo` scope)
+- [E2B API Key](https://e2b.dev/dashboard)
+- [NVIDIA API Key](https://build.nvidia.com/moonshotai/kimi-k2-instruct)
+- [GitHub Personal Access Token](https://github.com/settings/tokens) (repo scope)
 
 ### Setup & Installation
 
@@ -38,10 +37,8 @@ CodeSentinel isn't a chatbot; it's an **Agentic Workflow**. It follows a cycle o
 2. Create and activate a virtual environment:
    ```bash
    python -m venv venv
-   # Windows
-   .\venv\Scripts\Activate.ps1
-   # Linux/macOS
-   source venv/bin/activate
+   .\venv\Scripts\Activate.ps1 # Windows
+   source venv/bin/activate    # Linux/macOS
    ```
 3. Install dependencies:
    ```bash
@@ -49,7 +46,7 @@ CodeSentinel isn't a chatbot; it's an **Agentic Workflow**. It follows a cycle o
    ```
 4. Configure `.env`:
    ```bash
-   GEMINI_API_KEY=your_key
+   NVIDIA_API_KEY=your_key
    GITHUB_TOKEN=your_token
    E2B_API_KEY=your_e2b_key
    ```
